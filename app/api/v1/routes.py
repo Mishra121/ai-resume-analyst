@@ -1,9 +1,8 @@
 from fastapi import APIRouter
+from . import search
 
 
 router = APIRouter()
 
 
-@router.get("/ping")
-def ping():
-    return {"message": "pong"}
+router.include_router(search.router)
