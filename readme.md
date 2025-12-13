@@ -1,3 +1,39 @@
+
+## POC - Resume Analyst prototype
+
+This is a proof-of-concept for an AI-powered resume analysis and matching system.
+
+### Features
+- Semantic resume search using vector embeddings
+- RAG-based answer generation
+- Intent classification for HR queries
+- Calendar integration for scheduling (mock data)
+- Resume summary and Talent gap analysis
+
+
+High Level Agent Architecture
+
+![AI Agent Architecture](agent_workflow.png)
+
+[User Query]
+     ↓
+[Intent Classifier Node]
+     ↓
+ ┌─────────────┬──────────────┐──────────────┐
+ │             │              │              |
+[RAG Search] [Calendar] [Resume Summary]  [Talent gap analysis]
+     ↓
+[Context Aggregator]
+     ↓
+[Answer Generator]
+     ↓
+[Structured Output]
+
+
+
+### Setup Instructions
+
+
 docker compose build
 
 docker compose exec api bash
@@ -13,5 +49,4 @@ alembic revision --autogenerate -m "init schema"
 alembic upgrade head
 
 docker compose exec api python -m ingestion.ingest_initial_resumes
-
 

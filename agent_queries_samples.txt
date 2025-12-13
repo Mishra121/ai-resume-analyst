@@ -1,0 +1,11 @@
+These are just test quires, current agent dont provide the exact answers.
+Prototype for learning purpose only.
+
+- Find resume of software engineer with experience in full-stack development.
+- Show me the top 5 resumes of project managers who worked in IT projects.
+- List resumes for candidates familiar with Python and C++.
+- When is Ivy free for a one-hour interview?
+- Provide a summary of the resumes of business analysts in the data source
+- Identify skill gaps for potential learnings in our current software engineering team.
+
+
