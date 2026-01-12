@@ -16,6 +16,18 @@ services:
     environment:
       - PYTHONPATH=/app
 
+  chainlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.chainlit
+    container_name: resume-chainlit
+    ports:
+      - "8001:8001"
+    depends_on:
+      - api
+    environment:
+      - API_BASE_URL=http://api:8000
+
   db:
     image: ankane/pgvector:latest
     container_name: resume-db
