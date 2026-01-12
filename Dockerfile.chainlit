@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies
+RUN pip install --upgrade pip
+
+# Copy and install Chainlit requirements separately
+COPY requirements-chainlit.txt .
+RUN pip install --no-cache-dir -r requirements-chainlit.txt
+
+# Copy the Chainlit app
+COPY chainlit_app_standalone.py .
+
+EXPOSE 8001
+
+CMD ["chainlit", "run", "chainlit_app_standalone.py", "--host", "0.0.0.0", "--port", "8001"]
