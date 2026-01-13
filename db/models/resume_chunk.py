@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
 from db.base import Base
+from sqlalchemy.dialects.postgresql import JSONB
 
 class ResumeChunk(Base):
     __tablename__ = "resume_chunks"
@@ -10,5 +11,6 @@ class ResumeChunk(Base):
     resume_id = Column(Integer, ForeignKey("resumes.id"), nullable=False)
     chunk_text = Column(Text, nullable=False)
     embedding = Column(Vector(1536))  # text-embedding-3-small dim size
+    meta_data = Column(JSONB, nullable=True)
 
     resume = relationship("Resume", backref="chunks")
