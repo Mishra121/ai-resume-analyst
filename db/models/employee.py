@@ -6,5 +6,6 @@ class Employee(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    email = Column(String, unique=True, nullable=True)
+    email = Column(String, unique=True, nullable=False) 
     role = Column(String, nullable=True)
+    employeeid = Column(String, nullable=True)
