@@ -50,3 +50,6 @@ alembic upgrade head
 
 docker compose exec api python -m ingestion.ingest_initial_resumes
 
+
+ADD metadate to pdfs
+ exiftool -Title="Resume" -Author="SD" -employee_email="SD@company.com" -employee_id="SD" SD.pdf

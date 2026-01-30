@@ -6,8 +6,7 @@ class Resume(Base):
     __tablename__ = "resumes"
 
     id = Column(Integer, primary_key=True)
-    employee_id = Column(Integer, ForeignKey("employees.id"), nullable=False)
     file_path = Column(String, nullable=False)
     text_md = Column(String, nullable=False)  # full extracted markdown
-
+    employee_email = Column(String, ForeignKey("employees.email"), nullable=False)
     employee = relationship("Employee", backref="resumes")

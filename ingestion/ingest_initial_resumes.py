@@ -35,10 +35,28 @@ class ResumeIngestionPipeline:
             chunk_size=CHUNK_SIZE,
             chunk_overlap=CHUNK_OVERLAP
         )
+    def extract_metadata_from_pdf(self, filepath: str):
+        email = None
+        employeeid = None
+        try:
+            with pdfplumber.open(filepath) as pdf:
+                meta = pdf.metadata
+                if meta:
+                    email = meta.get("/employee_email")
+                    employeeid = meta.get("/employee_id")
+        except Exception as e:
+            print(f"Failed to read metadata from {filepath}: {e}")
+
+        # Fallback if email missing
+        if not email:
+            base_name = os.path.basename(filepath).split(".")[0]
+            email = f"{base_name}@company.com"
+
+        return email, employeeid
 
     # Load files
     def load_files(self) -> List[str]:
-        patterns = ["*.pdf", "*.docx", "*.md"]
+        patterns = ["*.pdf"] ##keeping pdfs for now
         files = []
         for p in patterns:
             files.extend(glob.glob(os.path.join(SOURCE_DIR, p)))
@@ -74,18 +92,62 @@ class ResumeIngestionPipeline:
     # Insert into DB
     def insert_into_db(self, employee_name: str, file_path: str, text: str,
                    chunks: List[str], embeddings: List[List[float]]):
-        # Create employee
-        employee = Employee(name=employee_name)
-        self.db.add(employee)
-        self.db.commit()
-        self.db.refresh(employee)
 
-        # Create resume with correct column names
-        resume = Resume(employee_id=employee.id, file_path=file_path, text_md=text)
-        self.db.add(resume)
-        self.db.commit()
-        self.db.refresh(resume)
+        email, employeeid = self.extract_metadata_from_pdf(file_path)
 
+
+        # Insert employee
+        employee = self.db.query(Employee).filter(Employee.email == email).first()
+        if not employee:
+            employee = Employee(
+                name=employee_name,
+                email=email,
+                employeeid=employeeid
+            )
+            self.db.add(employee)
+            self.db.commit()
+            self.db.refresh(employee)
+            print(f"Created new employee: {email}")
+        else:
+            if employeeid and employee.employeeid is None:
+                employee.employeeid = employeeid
+                self.db.commit()
+                print(f"Updated employeeid for {email}")
+
+            print(f"Employee {email} already exists (ID={employee.id})")
+
+        
+        # Insert Resume
+        resume = self.db.query(Resume).filter(
+            Resume.employee_email == email,
+            Resume.file_path == file_path
+        ).first()
+
+        if not resume:
+            resume = Resume(
+                employee_email=email,
+                file_path=file_path,
+                text_md=text
+            )
+            self.db.add(resume)
+            self.db.commit()
+            self.db.refresh(resume)
+            print(f"Inserted new resume for {email}")
+        else:
+            print(f"Resume {file_path} for {email} already exists, updating text and chunks")
+            resume = Resume(
+                id = resume.id,
+                employee_email=email,
+                file_path=file_path,
+                text_md=text,
+            )
+            self.db.commit()
+
+        # Delete old chunks
+        self.db.query(ResumeChunk).filter(
+            ResumeChunk.resume_id == resume.id
+        ).delete(synchronize_session=False)
+        self.db.commit()
         # Insert chunks
         for chunk_text, embed in zip(chunks, embeddings):
             rc = ResumeChunk(
