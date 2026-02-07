@@ -153,7 +153,10 @@ class ResumeIngestionPipeline:
             rc = ResumeChunk(
                 resume_id=resume.id,
                 chunk_text=chunk_text,
-                embedding=embed
+                embedding=embed,
+                meta_data= {
+                    "source":"Manual uploads"
+                }
             )
             self.db.add(rc)
 
